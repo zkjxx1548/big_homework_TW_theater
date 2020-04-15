@@ -1,10 +1,20 @@
 package com.example.demo;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 import java.util.Objects;
 
+@Table("student")
 public class Student {
+    @Id
+    private Integer id;
+    @Column("name")
     private String name;
+    @Column("sex")
     private String sex;
+    @Column("classroom")
     private String classroom;
 
     public Student() {
@@ -14,6 +24,17 @@ public class Student {
         this.name = name;
         this.sex = sex;
         this.classroom = classroom;
+    }
+
+    public Student(Integer id, String name, String sex, String classroom) {
+        this.id = id;
+        this.name = name;
+        this.sex = sex;
+        this.classroom = classroom;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public String getName() {
@@ -26,6 +47,10 @@ public class Student {
 
     public String getClassroom() {
         return classroom;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public void setName(String name) {
@@ -61,4 +86,5 @@ public class Student {
                 ", classroom='" + classroom + '\'' +
                 '}';
     }
+
 }

@@ -1,45 +1,49 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 public class StudentController {
-    public List<Student> students = new ArrayList();
+    @Autowired
+    private StudentRepository studentRepository;
 
     @PostMapping()
     public String add(@RequestBody Student student) {
-        if (students.contains(student)) {
-            return "姓名重复";
+        Iterable<Student> students = queryAllStudent();
+        AtomicReference<String> res = new AtomicReference<>("");
+        students.forEach(student1 -> {
+            if (Objects.equals(student1.getName(), student.getName())) {
+                res.set("姓名重复");
+            }
+        });
+        if (!Objects.equals(res.toString(), "姓名重复")) {
+            studentRepository.save(student);
+            res.set("添加成功");
         }
-        students.add(student);
-        return "添加成功";
+    return res.toString();
     }
 
     @GetMapping("/student/all")
-    public List<Student> queryAllStudent() {
-        return this.students;
+    public Iterable<Student> queryAllStudent() {
+        return studentRepository.findAll();
     }
 
     @GetMapping("/student/{name}")
     public Student queryStudentByName(@PathVariable String name) {
-        return students.stream()
-                .filter(student -> Objects.equals(student.getName(), name))
-                .findAny()
-                .orElse(new Student());
+        return studentRepository.findByName(name).orElse(null);
     }
 
     @DeleteMapping()
     public String delete(@RequestBody String name) {
-        for (Student student:students) {
-            if (Objects.equals(student.getName(), name)) {
-                students.remove(student);
-                return "删除成功";
-            }
+        Student student = queryStudentByName(name);
+        if (student == null) {
+            return "该学生不存在";
         }
-        return "该学生不存在";
+        studentRepository.delete(student);
+        return "删除成功";
     }
 }
